@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Takeaway Billing - MNRFoodBill</title>
+    <!-- Favicon -->
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <!-- iOS PWA Icons -->
+    <link rel="apple-touch-icon" href="ios/180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="ios/152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="ios/167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ios/180.png">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MNRFoodBill">
+    
+    <!-- External CSS -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-remote-config.js" defer></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js" defer></script>
+    <script src="js/layout.js" defer></script>
+    <script src="js/billing.js" defer></script>
+    <script src="js/print.js" defer></script>
+    <script src="js/image-upload.js" defer></script>
+    <script src="js/table-responsive.js" defer></script>
+    <script src="js/order-counter.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-32 h-32 mb-8">
+            <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full premium-loader-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-3 rounded-full shadow-sm premium-pulse">
+                    <i class="fas fa-utensils text-3xl text-red-500"></i>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 premium-float" style="animation-delay: 0s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-file-invoice-dollar text-yellow-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 transform -translate-x-1/4 translate-y-1/4 premium-float" style="animation-delay: 1.5s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-concierge-bell text-gray-700 text-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl font-bold text-gray-800 tracking-widest uppercase">MNR<span class="text-red-500">FoodBill</span></h2>
+            <div class="flex items-center justify-center space-x-2 text-gray-400 text-sm">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            </div>
+            <p class="text-gray-400 text-xs font-medium tracking-wide uppercase mt-2">Premium Restaurant POS</p>
+        </div>
+    </div>
+
+    <!-- Header (loaded via layout.js) -->
+    <div id="header"></div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6"> 
+            <!-- Sidebar (loaded via layout.js) -->
+            <div id="sidebar" class="hidden lg:block lg:col-span-1"></div>
+
+            <!-- Main Content -->
+            <div id="mainContent" class="lg:col-span-4">
+                <!-- Navigation Info Box -->
+                <div class="mb-4 bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <p class="font-medium text-blue-700">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                This page is for takeaway orders only.
+                            </p>
+                            <p class="text-sm text-blue-600 mt-1">
+                                For table/dine-in orders, go to <a href="tables.html" class="font-bold underline">Table Management</a>
+                            </p>
+                        </div>
+                        <a href="tables.html" class="whitespace-nowrap bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
+                            <i class="fas fa-chair mr-2"></i> Go to Tables
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Product Selection -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow p-6 mb-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="flex items-center space-x-4">
+                                    <h2 class="text-2xl font-bold text-gray-800">Takeaway Order</h2>
+                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        <i class="fas fa-box mr-1"></i> Takeaway
+                                    </span>
+                                </div>
+                                
+                                <!-- View Toggle -->
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600 mr-2 hidden sm:inline">View:</span>
+                                    <div class="flex bg-gray-100 rounded-lg p-1">
+                                        <button id="gridViewBtn" class="view-toggle active p-2 rounded-md" title="Grid View">
+                                            <i class="fas fa-th-large"></i>
+                                        </button>
+                                        <button id="listViewBtn" class="view-toggle p-2 rounded-md" title="List View">
+                                            <i class="fas fa-list"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Category Tabs -->
+                            <div class="flex overflow-x-auto mb-4 space-x-2 pb-2">
+                                <button class="category-tab active px-3 py-1.5 bg-red-500 text-white rounded-lg text-sm whitespace-nowrap" data-category="all">All Items</button>
+                                <!-- Categories will be loaded dynamically -->
+                            </div>
+
+                            <!-- Search -->
+                            <div class="mb-4">
+                                <div class="relative">
+                                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                    <input type="text" id="productSearch" 
+                                           class="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                           placeholder="Search products...">
+                                </div>
+                            </div>
+
+                            <!-- Products Container -->
+                            <div id="productsContainer">
+                                <!-- Grid View -->
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="productsGrid">
+                                    <!-- Products will be loaded here -->
+                                </div>
+                                
+                                <!-- List View (hidden by default) -->
+                                <div class="hidden" id="productsList">
+                                    <!-- Products will be loaded here in list format -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cart & Billing -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-xl shadow p-6 sticky top-6">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">Order Summary</h2>
+                            
+                            <!-- Customer Info -->
+                            <div class="mb-6">
+                                <h3 class="font-bold text-gray-700 mb-3">Customer Details</h3>
+                                <input type="text" id="customerName" 
+                                       class="w-full mb-3 px-4 py-2 border border-gray-300 rounded-lg"
+                                       placeholder="Customer Name (Optional)">
+                                <input type="tel" id="customerPhone" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                       placeholder="Phone Number (Optional)">
+                            </div>
+
+                            <!-- Cart Items -->
+                            <div class="mb-6">
+                                <h3 class="font-bold text-gray-700 mb-3">Items</h3>
+                                <div class="space-y-3 max-h-64 overflow-y-auto" id="cartItems">
+                                    <!-- Cart items will be shown here -->
+                                    <div class="text-center text-gray-500 py-8" id="emptyCart">
+                                        <i class="fas fa-shopping-cart text-3xl mb-2"></i>
+                                        <p>No items added yet</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Totals -->
+                            <div class="border-t pt-4">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-600">Subtotal</span>
+                                    <span class="font-bold" id="subtotal">₹0.00</span>
+                                </div>
+                                <div class="flex justify-between mb-2">
+                                    <span id="gstLabel" class="text-gray-600">GST (0%)</span>
+                                    <span id="gstAmount">₹0.00</span>
+                                </div>
+                                <div class="flex justify-between mb-2">
+                                    <span id="serviceLabel" class="text-gray-600">Service Charge (0%)</span>
+                                    <span id="serviceCharge">₹0.00</span>
+                                </div>
+                                <div class="flex justify-between text-xl font-bold border-t pt-4 mb-4">
+                                    <span>Total</span>
+                                    <span id="totalAmount">₹0.00</span>
+                                </div>
+
+                                <!-- Payment Section -->
+                                <div class="border-t pt-4 mb-4">
+                                    <h3 class="font-bold text-gray-700 mb-3">Payment Details</h3>
+                                    
+                                    <div class="mb-4">
+                                        <label class="block text-gray-600 mb-2">Payment Mode *</label>
+                                        <select id="paymentMode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" required>
+                                            <option value="cash">Cash</option>
+                                            <option value="card">Card</option>
+                                            <option value="upi">UPI</option>
+                                            <option value="online">Online</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Cash Payment Fields -->
+                                    <div id="cashPaymentFields" class="space-y-3">
+                                        <div>
+                                            <label class="block text-gray-600 mb-2">Cash Received *</label>
+                                            <input type="number" id="cashReceived" step="0.01" min="0"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                                   placeholder="Enter cash amount">
+                                        </div>
+                                        <div class="flex justify-between items-center bg-green-50 p-3 rounded-lg">
+                                            <span class="font-bold text-gray-700">Change to Return:</span>
+                                            <span id="changeAmount" class="text-xl font-bold text-green-600">₹0.00</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Non-cash Payment Fields -->
+                                    <div id="nonCashPaymentFields" class="hidden">
+                                        <div class="bg-blue-50 p-3 rounded-lg">
+                                            <p class="text-blue-700 text-sm">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Payment will be processed via selected method.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="mt-6 space-y-3">
+                                <button id="clearCart" 
+                                        class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50 transition">
+                                    <i class="fas fa-trash-alt mr-2"></i> Clear All
+                                </button>
+                                <button id="saveOrder" 
+                                        class="w-full bg-blue-500 text-white py-3 rounded-lg font-bold hover:bg-blue-600 transition">
+                                    <i class="fas fa-save mr-2"></i> Save Order
+                                </button>
+                                <button id="printBill" 
+                                        class="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white py-3 rounded-lg font-bold hover:from-red-600 hover:to-orange-600 transition">
+                                    <i class="fas fa-print mr-2"></i> Print Bill & Complete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md relative">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Print Receipt</h3>
+                    <div id="printContent" class="font-mono text-sm whitespace-pre-line mb-6 p-4 bg-gray-50 rounded-lg overflow-y-auto max-h-96">
+                        <!-- Receipt content will be here -->
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="printReceipt()" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600">
+                            <i class="fas fa-print mr-2"></i> Print Now
+                        </button>
+                        <button onclick="closePrintModal()" class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Worker and Initialization -->
+    <script>
+        // iOS PWA boot script — overlay + single SW registration
+        (function() {
+            function hideOverlay() {
+                var overlay = document.getElementById('loadingOverlay');
+                if (!overlay || overlay.dataset.hidden) return;
+                overlay.dataset.hidden = '1';
+                overlay.style.transition = 'opacity 0.4s ease';
+                overlay.style.opacity = '0';
+                setTimeout(function() { overlay.style.display = 'none'; }, 450);
+            }
+            window.addEventListener('load', function() { setTimeout(hideOverlay, 600); });
+            document.addEventListener('DOMContentLoaded', function() { setTimeout(hideOverlay, 3000); });
+            setTimeout(hideOverlay, 6000);
+        })();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function(reg) { console.log('[SW] Registered, scope:', reg.scope); })
+                .catch(function(err) { console.error('[SW] Registration failed:', err); });
+        }
+    </script>
+</body>
+</html>

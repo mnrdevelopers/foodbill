@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MNRFoodBill - Login</title>
+    <script>
+        if (window.top !== window.self) {
+            window.top.location.replace(window.location.href);
+        }
+    </script>
+    <!-- Favicon -->
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <!-- iOS PWA Icons -->
+    <link rel="apple-touch-icon" href="ios/180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="ios/152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="ios/167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ios/180.png">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MNRFoodBill">
+    
+    <!-- External CSS -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js" defer></script>
+    <script src="js/app-shell.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/pwa-install.js" defer></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        body.app-mode {
+            background: #f3f4f6;
+            padding: 0;
+            overflow: hidden;
+        }
+        body.app-mode #installContainer {
+            display: none;
+        }
+        #appShell {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+        }
+        #appFrame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #fff;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-32 h-32 mb-8">
+            <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full premium-loader-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-3 rounded-full shadow-sm premium-pulse">
+                    <i class="fas fa-utensils text-3xl text-red-500"></i>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 premium-float" style="animation-delay: 0s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-file-invoice-dollar text-yellow-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 transform -translate-x-1/4 translate-y-1/4 premium-float" style="animation-delay: 1.5s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-concierge-bell text-gray-700 text-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl font-bold text-gray-800 tracking-widest uppercase">MNR<span class="text-red-500">FoodBill</span></h2>
+            <div class="flex items-center justify-center space-x-2 text-gray-400 text-sm">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            </div>
+            <p class="text-gray-400 text-xs font-medium tracking-wide uppercase mt-2">Premium Restaurant POS</p>
+        </div>
+    </div>
+
+    <div id="loginScreen" class="w-full flex items-center justify-center">
+    <div class="login-card rounded-2xl shadow-2xl w-full max-w-md p-8">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-utensils text-white text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">MNRFoodBill</h1>
+            <p class="text-gray-600 mt-2" id="loginTypeTitle">Owner Login</p>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-gray-700 mb-1 text-sm font-semibold">Email Address</label>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="email" id="email" 
+                           class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                           placeholder="Enter your email" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1 text-sm font-semibold">Password</label>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="password" id="password" 
+                           class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                           placeholder="Enter your password" required>
+                    <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="flex justify-end mt-1">
+                    <a href="#" id="forgotPasswordLink" class="text-sm text-red-500 hover:text-red-600 font-medium">Forgot Password?</a>
+                </div>
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center justify-center shadow-md">
+                <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+            </button>
+
+            <div class="text-center">
+                <a href="#" id="registerBtn" class="text-red-500 hover:text-red-600 font-medium">Create new owner account</a>
+            </div>
+        </form>
+
+        <form id="registerForm" class="space-y-4 hidden">
+            <div>
+                <label class="block text-gray-700 mb-1 text-sm font-semibold">Restaurant Name</label>
+                <div class="relative">
+                    <i class="fas fa-store absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="restaurantName" 
+                           class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                           placeholder="e.g. MNR Food Court" required>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-gray-700 mb-1 text-sm font-semibold">Owner Full Name</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="regOwnerName" 
+                               class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                               placeholder="Enter your name" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-1 text-sm font-semibold">Phone Number</label>
+                    <div class="relative">
+                        <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="tel" id="regOwnerPhone" 
+                               class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                               placeholder="+91 9876543210" required>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1 text-sm font-semibold">Email Address</label>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="email" id="regEmail" 
+                           class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                           placeholder="Enter your email" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1 text-sm font-semibold">Password</label>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="password" id="regPassword" 
+                           class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                           placeholder="Min 6 characters" required minlength="6">
+                </div>
+            </div>
+
+            <div class="flex space-x-3 mt-4">
+                <button type="button" id="backToLogin" 
+                        class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-300">
+                    Back
+                </button>
+                <button type="submit" 
+                        class="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-2.5 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-md">
+                    Register
+                </button>
+            </div>
+        </form>
+
+        <div id="message" class="mt-4 p-3 rounded-lg hidden"></div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative animate-modal-up">
+            <button id="closeForgotModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-key text-red-500 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Reset Password</h3>
+                <p class="text-gray-600 text-sm mt-1">Enter your email to receive reset instructions</p>
+            </div>
+            <form id="forgotPasswordForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-1 text-sm font-semibold">Email Address</label>
+                    <input type="email" id="resetEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none" placeholder="Enter your registered email">
+                </div>
+                <button type="submit" class="w-full bg-red-500 text-white py-2 rounded-lg font-bold hover:bg-red-600 transition">
+                    Send Reset Link
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="absolute bottom-4 text-center text-white w-full">
+        <p>MNRFoodBill System v1.1 • Professional POS</p>
+    </div>
+
+    </div>
+
+    <div id="appShell" class="hidden z-40">
+        <iframe id="appFrame" title="MNRFoodBill App" src="about:blank"></iframe>
+    </div>
+
+    <!-- Install Button (will be added dynamically by pwa-install.js) -->
+    <div id="installContainer"></div>
+
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="hidden fixed top-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 z-50">
+        <i class="fas fa-wifi-slash mr-2"></i>
+        You are currently offline
+    </div>
+
+    <!-- Service Worker and Initialization -->
+    <script>
+        // iOS PWA boot script — overlay + single SW registration
+        (function() {
+            function hideOverlay() {
+                var overlay = document.getElementById('loadingOverlay');
+                if (!overlay || overlay.dataset.hidden) return;
+                overlay.dataset.hidden = '1';
+                overlay.style.transition = 'opacity 0.4s ease';
+                overlay.style.opacity = '0';
+                setTimeout(function() { overlay.style.display = 'none'; }, 450);
+            }
+            window.addEventListener('load', function() { setTimeout(hideOverlay, 600); });
+            document.addEventListener('DOMContentLoaded', function() { setTimeout(hideOverlay, 3000); });
+            setTimeout(hideOverlay, 6000); // iOS PWA cold-start failsafe
+        })();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function(reg) { console.log('[SW] Registered, scope:', reg.scope); })
+                .catch(function(err) { console.error('[SW] Registration failed:', err); });
+        }
+    </script>
+</body>
+</html>

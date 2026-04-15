@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dashboard - MNRFoodBill</title>
+    <!-- Favicon -->
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <!-- iOS PWA Icons -->
+    <link rel="apple-touch-icon" href="ios/180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="ios/152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="ios/167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ios/180.png">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MNRFoodBill">
+    
+    <!-- External CSS -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js" defer></script>
+    <script src="js/layout.js" defer></script>
+    <script src="js/dashboard.js" defer></script>
+    <script src="js/table-responsive.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-32 h-32 mb-8">
+            <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full premium-loader-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-3 rounded-full shadow-sm premium-pulse">
+                    <i class="fas fa-utensils text-3xl text-red-500"></i>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 premium-float" style="animation-delay: 0s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-file-invoice-dollar text-yellow-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 transform -translate-x-1/4 translate-y-1/4 premium-float" style="animation-delay: 1.5s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-concierge-bell text-gray-700 text-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl font-bold text-gray-800 tracking-widest uppercase">MNR<span class="text-red-500">FoodBill</span></h2>
+            <div class="flex items-center justify-center space-x-2 text-gray-400 text-sm">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            </div>
+            <p class="text-gray-400 text-xs font-medium tracking-wide uppercase mt-2">Premium Restaurant POS</p>
+        </div>
+    </div>
+
+    <!-- Header (loaded via layout.js) -->
+    <div id="header"></div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar (loaded via layout.js) -->
+            <div id="sidebar" class="hidden lg:block lg:col-span-1"></div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <!-- Welcome Section with Dynamic Greeting -->
+                <div class="bg-white rounded-xl shadow p-6 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-red-500">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800" id="welcomeGreeting">Welcome back!</h1>
+                        <p class="text-gray-500 mt-1" id="currentDateTime"></p>
+                    </div>
+                    <div class="mt-4 md:mt-0 bg-red-50 px-4 py-2 rounded-lg">
+                        <span class="text-red-600 font-semibold" id="dashboardRestaurantName">MNRFoodBill</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Stats Cards -->
+                    <div class="stat-card bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Total Revenue</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="totalRevenue">₹0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-rupee-sign text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Total Orders</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="totalOrders">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Products</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="totalProducts">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-hamburger text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders -->
+                <div class="bg-white rounded-xl shadow p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Recent Orders</h2>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <div class="scroll-indicator">→</div>
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4">Order ID</th>
+                                        <th class="text-left py-3 px-4">Time</th>
+                                        <th class="text-left py-3 px-4">Items</th>
+                                        <th class="text-left py-3 px-4">Amount</th>
+                                        <th class="text-left py-3 px-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrders">
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-gray-500">
+                                            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-red-500 mr-2"></div>
+                                            Loading orders...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Most Ordered Products -->
+<div class="bg-white rounded-xl shadow p-4 mt-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Most Ordered Products</h2>
+    <div class="table-container">
+        <div class="table-wrapper">
+            <div class="scroll-indicator">→</div>
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b">
+                        <th class="text-left py-3 px-4">Rank</th>
+                        <th class="text-left py-3 px-4">Product Name</th>
+                        <th class="text-left py-3 px-4">Category</th>
+                        <th class="text-left py-3 px-4">Total Orders</th>
+                        <th class="text-left py-3 px-4">Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="mostOrderedProducts">
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-gray-500">
+                            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-red-500 mr-2"></div>
+                            Loading product analytics...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="bg-gradient-to-r from-red-500 to-orange-500 rounded-xl shadow p-6 text-white">
+                        <h3 class="text-xl font-bold mb-4">Create New Bill</h3>
+                        <p class="mb-6">Start a new order and print receipt</p>
+                        <a href="billing.html" class="bg-white text-red-600 px-6 py-3 rounded-lg font-bold inline-flex items-center hover:bg-gray-100 transition">
+                            <i class="fas fa-plus mr-2"></i> New Bill
+                        </a>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow p-6 text-white">
+                        <h3 class="text-xl font-bold mb-4">Manage Products</h3>
+                        <p class="mb-6">Add, edit or remove menu items</p>
+                        <a href="products.html" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold inline-flex items-center hover:bg-gray-100 transition">
+                            <i class="fas fa-edit mr-2"></i> Manage Menu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md relative">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Print Receipt</h3>
+                    <div id="printContent" class="font-mono text-sm whitespace-pre-line mb-6 p-4 bg-gray-50 rounded-lg overflow-y-auto max-h-96">
+                        <!-- Print content will go here -->
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="printReceipt()" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600">
+                            <i class="fas fa-print mr-2"></i> Print Now
+                        </button>
+                        <button onclick="closePrintModal()" class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Worker and Initialization -->
+    <script>
+        // iOS PWA boot script — overlay + single SW registration
+        (function() {
+            function hideOverlay() {
+                var overlay = document.getElementById('loadingOverlay');
+                if (!overlay || overlay.dataset.hidden) return;
+                overlay.dataset.hidden = '1';
+                overlay.style.transition = 'opacity 0.4s ease';
+                overlay.style.opacity = '0';
+                setTimeout(function() { overlay.style.display = 'none'; }, 450);
+            }
+            window.addEventListener('load', function() { setTimeout(hideOverlay, 600); });
+            document.addEventListener('DOMContentLoaded', function() { setTimeout(hideOverlay, 3000); });
+            setTimeout(hideOverlay, 6000); // iOS PWA cold-start failsafe
+        })();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function(reg) { console.log('[SW] Registered, scope:', reg.scope); })
+                .catch(function(err) { console.error('[SW] Registration failed:', err); });
+        }
+    </script>
+</body>
+</html>

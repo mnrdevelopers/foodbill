@@ -1,0 +1,51 @@
+<!-- components/sidebar.html -->
+<div class="h-full transition-all duration-300 ease-in-out">
+    <div class="bg-white rounded-xl shadow p-4 h-full overflow-y-auto relative">
+        <button id="sidebarToggleDesktop" 
+                class="lg:flex hidden absolute -right-3 top-6 bg-red-500 text-white w-6 h-6 rounded-full items-center justify-center z-10 hover:bg-red-600 transition-transform duration-300">
+            <i id="sidebarToggleIcon" class="fas fa-chevron-left text-xs"></i>
+        </button>
+        
+        <nav id="sidebarNav" class="space-y-2 transition-all duration-300">
+            <a href="dashboard.html" class="flex items-center space-x-3 p-3 text-gray-600 rounded-lg sidebar-link" data-tooltip="Dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="billing.html" class="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition sidebar-link" data-tooltip="Billing">
+                <i class="fas fa-cash-register"></i>
+                <span class="font-medium">Billing</span>
+            </a>
+            <a href="tables.html" class="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition sidebar-link" data-tooltip="Tables">
+                <i class="fas fa-chair"></i>
+                <span class="font-medium">Tables</span>
+            </a>
+            <a href="products.html" class="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition sidebar-link" data-tooltip="Products">
+                <i class="fas fa-hamburger"></i>
+                <span class="font-medium">Products</span>
+            </a>
+            <a href="orders.html" class="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition sidebar-link" data-tooltip="Orders">
+                <i class="fas fa-receipt"></i>
+                <span class="font-medium">Orders</span>
+            </a>
+            <!-- New Staff Management Link -->
+            <a href="staff.html" class="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition sidebar-link" data-tooltip="Staff">
+                <i class="fas fa-users-cog"></i>
+                <span class="font-medium">Staff Management</span>
+            </a>
+            <a href="settings.html" class="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition sidebar-link" data-tooltip="Settings">
+                <i class="fas fa-gear"></i>
+                <span class="font-medium">Settings</span>
+            </a>
+        </nav>
+
+        <div id="sidebarStats" class="mt-8 p-4 bg-blue-50 rounded-lg transition-all duration-300">
+            <h3 class="font-bold text-blue-800 mb-2">Quick Stats</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-blue-600">Today Sales</span>
+                    <span class="font-bold" id="todaySales">₹0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

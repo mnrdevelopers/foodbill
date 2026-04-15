@@ -1,0 +1,445 @@
+<!-- tables.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Table Management - MNRFoodBill</title>
+    <!-- Favicon -->
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <!-- iOS PWA Icons -->
+    <link rel="apple-touch-icon" href="ios/180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="ios/152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="ios/167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ios/180.png">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MNRFoodBill">
+    
+    <!-- External CSS -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js" defer></script>
+    <script src="js/order-counter.js" defer></script>
+    <script src="js/layout.js" defer></script>
+    <script src="js/tables.js" defer></script>
+    <script src="js/table-responsive.js" defer></script>
+    <script src="js/image-upload.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-32 h-32 mb-8">
+            <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full premium-loader-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-3 rounded-full shadow-sm premium-pulse">
+                    <i class="fas fa-utensils text-3xl text-red-500"></i>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 premium-float" style="animation-delay: 0s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-file-invoice-dollar text-yellow-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 transform -translate-x-1/4 translate-y-1/4 premium-float" style="animation-delay: 1.5s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-concierge-bell text-gray-700 text-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl font-bold text-gray-800 tracking-widest uppercase">MNR<span class="text-red-500">FoodBill</span></h2>
+            <div class="flex items-center justify-center space-x-2 text-gray-400 text-sm">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            </div>
+            <p class="text-gray-400 text-xs font-medium tracking-wide uppercase mt-2">Premium Restaurant POS</p>
+        </div>
+    </div>
+
+    <!-- Header (loaded via layout.js) -->
+    <div id="header"></div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar (loaded via layout.js) -->
+            <div id="sidebar" class="hidden lg:block lg:col-span-1"></div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Table Management</h1>
+                    <div class="flex space-x-3">
+                        <button id="takeawayBtn" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-600">
+                            <i class="fas fa-utensils mr-2"></i> Takeaway Order
+                        </button>
+                        <button id="addTableBtn" class="bg-red-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-600">
+                            <i class="fas fa-plus mr-2"></i> Add Table
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Occupied Tables</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="occupiedTables">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-chair text-red-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Available Tables</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="availableTables">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-chair text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Active Orders</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="activeOrders">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-receipt text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Today's Dine-in</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="todayDinein">₹0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-rupee-sign text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tables Grid -->
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Tables Layout</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="tablesGrid">
+                        <!-- Tables will be loaded here -->
+                        <div class="col-span-full py-8 text-center text-gray-500">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mr-2"></div>
+                            Loading tables...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Table Orders -->
+                <div class="bg-white rounded-xl shadow p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Active Table Orders</h2>
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <div class="scroll-indicator">→</div>
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4">Table</th>
+                                        <th class="text-left py-3 px-4">Customer</th>
+                                        <th class="text-left py-3 px-4">Order ID</th>
+                                        <th class="text-left py-3 px-4">Items</th>
+                                        <th class="text-left py-3 px-4">Amount</th>
+                                        <th class="text-left py-3 px-4">Status</th>
+                                        <th class="text-left py-3 px-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activeOrdersTable">
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-gray-500">
+                                            No active table orders
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Table Modal -->
+    <div id="tableModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md relative">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4" id="tableModalTitle">Add New Table</h3>
+                    
+                    <form id="tableForm" class="space-y-4">
+                        <input type="hidden" id="tableId">
+                        
+                        <div>
+                            <label class="block text-gray-700 mb-2">Table Number/Name *</label>
+                            <input type="text" id="tableName" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 mb-2">Capacity (Persons) *</label>
+                            <input type="number" id="tableCapacity" min="1" max="20" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 mb-2">Table Type</label>
+                            <select id="tableType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                                <option value="indoor">Indoor</option>
+                                <option value="outdoor">Outdoor</option>
+                                <option value="private">Private Room</option>
+                                <option value="bar">Bar Counter</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 mb-2">Description</label>
+                            <textarea id="tableDescription" rows="2"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                      placeholder="e.g., Near window, AC table"></textarea>
+                        </div>
+
+                        <div class="flex space-x-3 pt-4">
+                            <button type="submit" 
+                                    class="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600">
+                                <i class="fas fa-save mr-2"></i> Save Table
+                            </button>
+                            <button type="button" onclick="closeTableModal()"
+                                    class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal for Table -->
+    <div id="tableOrderModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl relative">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800" id="tableOrderTitle">Table Order</h3>
+                        <button onclick="closeTableOrderModal()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Order Details -->
+                        <div class="lg:col-span-2">
+                            <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-gray-600">Table</p>
+                                        <p class="font-bold" id="currentTableName">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Customer</p>
+                                        <input type="text" id="tableCustomerName" 
+                                               class="w-full px-3 py-1 border border-gray-300 rounded text-sm"
+                                               placeholder="Customer name">
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Persons</p>
+                                        <input type="number" id="tablePersons" min="1"
+                                               class="w-full px-3 py-1 border border-gray-300 rounded text-sm"
+                                               value="2">
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Phone</p>
+                                        <input type="tel" id="tableCustomerPhone" 
+                                               class="w-full px-3 py-1 border border-gray-300 rounded text-sm"
+                                               placeholder="Phone (optional)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Products Selection -->
+                            <div id="tableProductsSection" class="hidden">
+                                <h4 class="font-bold text-gray-700 mb-3">Select Products</h4>
+                                <div class="mb-4">
+                                    <div class="relative">
+                                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                        <input type="text" id="tableProductSearch" 
+                                               class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg"
+                                               placeholder="Search products...">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="tableProductsGrid">
+                                    <!-- Products loaded here -->
+                                </div>
+                            </div>
+
+                            <!-- Current Order Items -->
+                            <div class="mt-6">
+                                <h4 class="font-bold text-gray-700 mb-3">Order Items</h4>
+                                <div class="space-y-2 max-h-64 overflow-y-auto" id="tableOrderItems">
+                                    <!-- Items will appear here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-xl border p-4 sticky top-4">
+                                <h4 class="font-bold text-gray-700 mb-4">Order Summary</h4>
+                                
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Subtotal</span>
+                                        <span class="font-bold" id="tableSubtotal">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">GST (18%)</span>
+                                        <span id="tableGstAmount">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Service Charge (5%)</span>
+                                        <span id="tableServiceCharge">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between text-lg font-bold border-t pt-2">
+                                        <span>Total</span>
+                                        <span id="tableTotalAmount">₹0.00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Order Actions -->
+                                <div class="space-y-2">
+                                    <button id="addMoreItemsBtn" class="w-full bg-blue-500 text-white py-2 rounded-lg font-bold hover:bg-blue-600 text-sm">
+                                        <i class="fas fa-plus mr-2"></i> Add More Items
+                                    </button>
+                                    <button id="saveTableOrderBtn" class="w-full bg-green-500 text-white py-2 rounded-lg font-bold hover:bg-green-600 text-sm">
+                                        <i class="fas fa-save mr-2"></i> Save Order
+                                    </button>
+                                    <button id="printTableBillBtn" class="w-full bg-red-500 text-white py-2 rounded-lg font-bold hover:bg-red-600 text-sm">
+                                        <i class="fas fa-print mr-2"></i> Print Bill & Close
+                                    </button>
+                                    <button id="splitBillBtn" class="w-full bg-purple-500 text-white py-2 rounded-lg font-bold hover:bg-purple-600 text-sm">
+                                        <i class="fas fa-divide mr-2"></i> Split Bill
+                                    </button>
+                                </div>
+
+                                <!-- Order History -->
+                                <div class="mt-6 border-t pt-4">
+                                    <h5 class="font-bold text-gray-700 mb-2">Order History</h5>
+                                    <div class="space-y-2 text-sm" id="tableOrderHistory">
+                                        <!-- Past orders will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Split Bill Modal -->
+    <div id="splitBillModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md relative">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Split Bill</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Number of Splits</label>
+                            <input type="number" id="splitCount" min="2" max="10" value="2"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 mb-2">Split Method</label>
+                            <select id="splitMethod" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                <option value="equal">Equal Split</option>
+                                <option value="custom">Custom Amounts</option>
+                            </select>
+                        </div>
+
+                        <div id="customSplitSection" class="hidden">
+                            <label class="block text-gray-700 mb-2">Enter Amounts (₹)</label>
+                            <div id="customSplitInputs">
+                                <!-- Dynamic inputs will be added here -->
+                            </div>
+                        </div>
+
+                        <div id="splitResults" class="hidden">
+                            <h4 class="font-bold text-gray-700 mb-2">Split Results</h4>
+                            <div id="splitAmounts" class="space-y-2">
+                                <!-- Split amounts will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="calculateSplit()" class="flex-1 bg-blue-500 text-white py-2 rounded-lg font-bold hover:bg-blue-600">
+                            Calculate
+                        </button>
+                        <button onclick="closeSplitModal()" class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg font-bold hover:bg-gray-50">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // iOS PWA boot script — overlay + single SW registration
+        (function() {
+            function hideOverlay() {
+                var overlay = document.getElementById('loadingOverlay');
+                if (!overlay || overlay.dataset.hidden) return;
+                overlay.dataset.hidden = '1';
+                overlay.style.transition = 'opacity 0.4s ease';
+                overlay.style.opacity = '0';
+                setTimeout(function() { overlay.style.display = 'none'; }, 450);
+            }
+            window.addEventListener('load', function() { setTimeout(hideOverlay, 600); });
+            document.addEventListener('DOMContentLoaded', function() { setTimeout(hideOverlay, 3000); });
+            setTimeout(hideOverlay, 6000);
+        })();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function(reg) { console.log('[SW] Registered, scope:', reg.scope); })
+                .catch(function(err) { console.error('[SW] Registration failed:', err); });
+        }
+    </script>
+</body>
+</html>

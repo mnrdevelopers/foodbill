@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - MNRFoodBill</title>
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-remote-config.js" defer></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js" defer></script>
+    <script src="js/layout.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/table-responsive.js" defer></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <div id="header"></div>
+
+    <div class="container mx-auto px-4 py-6 flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div id="sidebar" class="hidden lg:block lg:col-span-1"></div>
+
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Contact Us</h1>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <p class="text-gray-600">Have questions or need support? We're here to help! Reach out to us
+                                through any of the following channels.</p>
+
+                            <div class="flex items-start space-x-4">
+                                <div
+                                    class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-envelope text-red-500"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Email Support</h3>
+                                    <p class="text-gray-600">mnrdeveloper11@gmail.com</p>
+                                    <p class="text-sm text-gray-500">Response within 24 hours</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4">
+                                <div
+                                    class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-phone text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Phone Support</h3>
+                                    <p class="text-gray-600">+91 74160 06394</p>
+                                    <p class="text-sm text-gray-500">Mon-Fri, 9am - 6pm IST</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4">
+                                <div
+                                    class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-map-marker-alt text-green-500"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Office Address</h3>
+                                    <p class="text-gray-600">123 Tech Park, Sector 5<br>Bangalore, Karnataka 560001</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                            <h3 class="font-bold text-gray-800 mb-4">Send us a message</h3>
+                            <p class="text-sm text-gray-500 mb-4">For immediate assistance, please use the email or
+                                phone number provided.</p>
+                            <a href="mailto:support@mnrfoodbill.com"
+                                class="block w-full bg-red-500 text-white text-center py-3 rounded-lg font-bold hover:bg-red-600 transition">
+                                <i class="fas fa-paper-plane mr-2"></i> Email Us Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function (reg) { console.log('[SW] Registered, scope:', reg.scope); })
+                .catch(function (err) { console.error('[SW] Registration failed:', err); });
+        }
+    </script>
+</body>
+
+</html>

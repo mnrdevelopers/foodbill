@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - MNRFoodBill</title>
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-remote-config.js" defer></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js" defer></script>
+    <script src="js/layout.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/table-responsive.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <div id="header"></div>
+
+    <div class="container mx-auto px-4 py-6 flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div id="sidebar" class="hidden lg:block lg:col-span-1"></div>
+
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow-sm p-8">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Terms and Conditions</h1>
+                    
+                    <div class="prose max-w-none text-gray-600 space-y-6">
+                        <p>Last updated: January 15, 2026</p>
+
+                        <h2 class="text-xl font-bold text-gray-800">1. Acceptance of Terms</h2>
+                        <p>By accessing or using MNRFoodBill, you agree to be bound by these Terms and Conditions. If you disagree with any part of the terms, you may not access the service.</p>
+
+                        <h2 class="text-xl font-bold text-gray-800">2. Use License</h2>
+                        <p>Permission is granted to temporarily download one copy of the materials (information or software) on MNRFoodBill for personal, non-commercial transitory viewing only.</p>
+
+                        <h2 class="text-xl font-bold text-gray-800">3. Account Responsibilities</h2>
+                        <p>You are responsible for maintaining the confidentiality of your account and password and for restricting access to your computer. You agree to accept responsibility for all activities that occur under your account or password.</p>
+
+                        <h2 class="text-xl font-bold text-gray-800">4. Service Modifications</h2>
+                        <p>MNRFoodBill reserves the right at any time to modify or discontinue, temporarily or permanently, the Service (or any part thereof) with or without notice.</p>
+
+                        <h2 class="text-xl font-bold text-gray-800">5. Limitation of Liability</h2>
+                        <p>In no event shall MNRFoodBill be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on MNRFoodBill.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function(reg) { console.log('[SW] Registered, scope:', reg.scope); })
+                .catch(function(err) { console.error('[SW] Registration failed:', err); });
+        }
+    </script>
+</body>
+</html>

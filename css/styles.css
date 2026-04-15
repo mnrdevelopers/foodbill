@@ -1,0 +1,2045 @@
+/* Custom styles for thermal printer simulation */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    #printContent, #printContent * {
+        visibility: visible;
+    }
+    
+    #printContent {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 58mm;
+        font-family: monospace;
+        font-size: 12px;
+        white-space: pre-line;
+        line-height: 1.2;
+    }
+}
+
+/* Animation for notifications */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    table {
+        font-size: 14px;
+    }
+    
+    .sidebar {
+        height: auto;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Thermal printer specific styles */
+.thermal-receipt {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1;
+    white-space: pre-line;
+    word-wrap: break-word;
+}
+
+/* Button hover effects */
+.btn-hover {
+    transition: all 0.3s ease;
+}
+
+.btn-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading animation */
+.loading-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #ef4444;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Modal animations */
+.modal-enter {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
+
+/* Print Modal Scrollbar Styling */
+#printContent {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: pre-line;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+/* Custom scrollbar for print preview */
+#printContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+#printContent::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#printContent::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#printContent::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Ensure modal content is scrollable when needed */
+#printModal > div {
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+#printModal .p-6 {
+    max-height: calc(90vh - 48px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make the modal responsive */
+@media (max-width: 640px) {
+    #printModal > div {
+        width: 95%;
+        max-height: 85vh;
+    }
+    
+    #printContent {
+        max-height: 200px;
+    }
+}
+
+/* Print Modal Fixes */
+#printModal {
+    z-index: 9999 !important;
+    backdrop-filter: blur(4px);
+}
+
+#printModal > div {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+#printContent {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: pre-line;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+}
+
+/* Custom scrollbar styling */
+#printContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+#printContent::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#printContent::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+#printContent::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Ensure the modal stays on top */
+.fixed.inset-0 {
+    z-index: 9999;
+}
+
+/* Modal animation */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* For smaller screens */
+@media (max-width: 640px) {
+    #printModal .max-w-md {
+        width: 95%;
+        margin: 0 auto;
+    }
+    
+    #printContent {
+        max-height: 50vh;
+        font-size: 11px;
+    }
+}
+
+/* Fix the print modal visibility */
+.hidden {
+    display: none !important;
+}
+
+/* Add to styles.css */
+@media (max-width: 992px) {
+    .sidebar {
+        height: auto !important;
+        margin-bottom: 1rem;
+    }
+    
+    .navbar-collapse {
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .table-responsive {
+        font-size: 14px;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Add these styles to your existing styles.css */
+
+/* Mobile sidebar styles */
+#mobileSidebar {
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#mobileSidebarOverlay {
+    z-index: 30;
+}
+
+/* Prevent body scroll when sidebar is open */
+body.sidebar-open {
+    overflow: hidden;
+}
+
+/* Responsive improvements */
+@media (max-width: 1024px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .lg\:col-span-3 {
+        grid-column: span 1;
+    }
+    
+    .sticky {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    h1, h2, h3 {
+        font-size: 1.25rem;
+    }
+    
+    .text-3xl {
+        font-size: 1.75rem;
+    }
+    
+    table {
+        font-size: 14px;
+    }
+    
+    .p-6 {
+        padding: 1rem;
+    }
+    
+    /* Mobile sidebar */
+    #mobileSidebar {
+        width: 280px;
+    }
+}
+
+@media (max-width: 640px) {
+    .grid-cols-1 {
+        grid-template-columns: 1fr;
+    }
+    
+    .md\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .lg\:grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Billing page specific mobile adjustments */
+    #productsGrid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Better spacing for mobile */
+    .space-y-6 > * + * {
+        margin-top: 1rem;
+    }
+}
+
+/* Print modal z-index fix */
+.fixed.z-50 {
+    z-index: 9999;
+}
+
+/* Ensure all modals are above everything */
+.fixed.inset-0 {
+    z-index: 9998;
+}
+
+/* Smooth transitions */
+.transition {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* styles.css - Add image optimization */
+.product-image {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Product card image container */
+.product-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Fallback image styles */
+.image-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9fafb;
+    color: #9ca3af;
+}
+
+/* Smooth image loading */
+img {
+    transition: opacity 0.3s ease;
+}
+
+img[src*="githubusercontent"] {
+    background-color: #f9fafb;
+}
+
+/* Make sure images don't overflow */
+.product-card img {
+    max-height: 160px;
+    object-fit: cover;
+}
+
+/* Collapsed Sidebar Styles */
+.sidebar-collapsed {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+}
+
+.sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+}
+
+.sidebar-collapsed .sidebar-link i {
+    margin-right: 0 !important;
+}
+
+.sidebar-collapsed .sidebar-link span {
+    display: none !important;
+}
+
+.sidebar-collapsed #sidebarStats {
+    display: none !important;
+}
+
+.sidebar-collapsed #sidebarToggleDesktop {
+    transform: translateX(-8px);
+}
+
+/* Smooth transitions for sidebar */
+#sidebar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#sidebarNav {
+    transition: all 0.3s ease;
+}
+
+.sidebar-link span {
+    transition: all 0.3s ease;
+}
+
+#sidebarStats {
+    transition: all 0.3s ease;
+}
+
+/* Main content transition */
+.lg\:col-span-3, .lg\:col-span-4 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Toggle button animations */
+#sidebarToggleDesktop {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#sidebarToggleDesktop:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Tooltip for collapsed sidebar */
+.sidebar-collapsed .sidebar-link {
+    position: relative;
+}
+
+.sidebar-collapsed .sidebar-link:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    margin-left: 0.75rem;
+    z-index: 50;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure tooltip doesn't overflow */
+.sidebar-collapsed .sidebar-link {
+    overflow: visible;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .sidebar-collapsed {
+        width: auto !important;
+        min-width: auto !important;
+        max-width: auto !important;
+    }
+    
+    .lg\:col-span-3, .lg\:col-span-4 {
+        transition: none;
+    }
+}
+
+/* Animation for toggle icon */
+#sidebarToggleIcon {
+    transition: transform 0.3s ease;
+}
+
+.sidebar-collapsed #sidebarToggleIcon {
+    transform: rotate(180deg);
+}
+
+/* Better hover states for collapsed sidebar */
+.sidebar-collapsed .sidebar-link:hover {
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+}
+
+/* Sidebar Collapse Styles */
+.sidebar-collapsed {
+    width: 4rem !important;
+    min-width: 4rem !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar-collapsed #sidebarNav {
+    align-items: center !important;
+}
+
+.sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+}
+
+.sidebar-collapsed .sidebar-link i {
+    margin-right: 0 !important;
+    font-size: 1.1rem !important;
+}
+
+/* Ensure smooth transitions */
+#sidebar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Main content transition */
+#mainContent, .lg\\:col-span-3, .lg\\:col-span-4 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Role-based styling */
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-owner {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.role-staff {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.role-admin {
+    background-color: #f3e8ff;
+    color: #6b21a8;
+}
+
+/* Permission denied message */
+.permission-denied {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+}
+
+/* Staff management specific */
+.staff-table tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Modal animations */
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-slide-up {
+    animation: slideInUp 0.3s ease-out;
+}
+
+/* PWA Specific Styles */
+/* Fix scrolling in standalone mode */
+@media (display-mode: standalone) {
+  /* iOS Safe Areas */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    -webkit-overflow-scrolling: touch !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+  
+  html {
+    height: 100% !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Fix scrolling container */
+  .container {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Fix main content scrolling */
+  #mainContent,
+  .lg\\:col-span-3,
+  .lg\\:col-span-4 {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(100vh - 120px) !important;
+  }
+  
+  /* Fix cart scrolling */
+  #cartItems {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Prevent body from being fixed */
+  body {
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Global scrolling fixes */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fix for iOS momentum scrolling */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for all scrollable containers */
+.overflow-y-auto,
+.overflow-auto,
+.max-h-64,
+.max-h-96 {
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Special fix for iOS PWA */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available !important;
+  }
+  
+  body {
+    min-height: -webkit-fill-available !important;
+  }
+}
+
+/* Install Button Animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 15px 35px rgba(239, 68, 68, 0.5);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Update Notification Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Prevent text size adjustment on mobile */
+input, 
+textarea, 
+select {
+  font-size: 16px !important;
+}
+
+/* Better touch feedback */
+button:active,
+[role="button"]:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+  transition: all 0.1s ease;
+}
+
+/* Standalone mode adjustments */
+@media (display-mode: standalone) and (max-width: 768px) {
+  /* Full height for standalone */
+  body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  html {
+    height: -webkit-fill-available;
+  }
+  
+  /* Fix modal scrolling */
+  #printModal,
+  #orderModal,
+  #deleteModal,
+  #productModal,
+  #staffModal,
+  #reauthModal {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Fix table scrolling */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* Image Upload Styles */
+#imageUploadArea {
+    transition: all 0.3s ease;
+}
+
+#imageUploadArea:hover {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+#imagePreview {
+    transition: transform 0.3s ease;
+}
+
+#imagePreview:hover {
+    transform: scale(1.05);
+}
+
+.progress-bar {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Ensure images display properly in cart */
+#cartItems img {
+    object-fit: cover;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#productsGrid img {
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+#productsGrid .group:hover img {
+    transform: scale(1.05);
+}
+
+/* Add to styles.css */
+#imageUploadArea.compressing {
+    border-color: #f59e0b;
+    background-color: #fffbeb;
+}
+
+.compression-stats {
+    font-size: 11px;
+    padding: 4px 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+.progress-bar.compressing .progress-fill {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.quality-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.quality-indicator .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+}
+
+.quality-indicator.low .dot {
+    background: #ef4444;
+}
+
+.quality-indicator.medium .dot {
+    background: #f59e0b;
+}
+
+/* Compact Product Cards */
+.compact-card {
+    transition: all 0.2s ease;
+}
+
+.compact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.compact-card .product-image {
+    height: 80px;
+    object-fit: cover;
+}
+
+.compact-card .product-name {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    height: 2.5rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.compact-card .product-price {
+    font-size: 0.875rem;
+}
+
+.compact-card .product-category {
+    font-size: 0.75rem;
+}
+
+/* List View Styles */
+.list-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.list-item:hover {
+    background-color: #f9fafb;
+    border-color: #ef4444;
+}
+
+.list-item .list-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    margin-right: 1rem;
+}
+
+.list-item .list-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.list-item .list-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-item .list-description {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-item .list-category {
+    font-size: 0.75rem;
+    color: #ef4444;
+    background-color: #fef2f2;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    display: inline-block;
+}
+
+.list-item .list-price {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #ef4444;
+    margin-left: 1rem;
+    min-width: 60px;
+    text-align: right;
+}
+
+/* View Toggle */
+.view-toggle {
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.view-toggle:hover {
+    color: #ef4444;
+    background-color: white;
+}
+
+.view-toggle.active {
+    color: white;
+    background-color: #ef4444;
+}
+
+/* Enhanced Compact Styles */
+#productsGrid {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Scrollbar styling */
+#productsGrid::-webkit-scrollbar {
+    width: 6px;
+}
+
+#productsGrid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#productsGrid::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+#productsGrid::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* List View Container */
+#productsList {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Category Tabs Scrollbar */
+.category-tab-container {
+    scrollbar-width: thin;
+    scrollbar-color: #ef4444 #f1f1f1;
+}
+
+/* Hover effects for both views */
+.compact-card:hover .product-image {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.list-item:hover .list-image {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+/* Quick add animation */
+@keyframes quickAdd {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.add-to-cart:active, .add-to-cart-list:active {
+    animation: quickAdd 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    #productsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .compact-card .product-image {
+        height: 70px;
+    }
+    
+    .list-item {
+        padding: 0.5rem;
+    }
+    
+    .list-item .list-image {
+        width: 50px;
+        height: 50px;
+        margin-right: 0.75rem;
+    }
+}
+
+/* Active state for category tabs */
+.category-tab.active {
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+/* Variation styles */
+.variation-badge {
+    background: #3b82f6;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.variation-option {
+    transition: all 0.2s ease;
+}
+
+.variation-option:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.variation-option.selected {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+/* Cart item variations */
+.cart-item-variation {
+    font-size: 11px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 1px 6px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Food Type Indicators */
+.food-type-veg {
+    color: #10b981;
+}
+
+.food-type-nonveg {
+    color: #ef4444;
+}
+
+.food-badge {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    border: 1px solid white;
+}
+
+.food-badge.veg {
+    background-color: #10b981;
+}
+
+.food-badge.nonveg {
+    background-color: #ef4444;
+}
+
+/* Quantity Type Labels */
+.quantity-label {
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Category Colors */
+.category-badge {
+    transition: all 0.2s ease;
+}
+
+.category-badge:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .compact-card .product-name {
+        font-size: 0.8rem;
+        height: 2rem;
+    }
+    
+    .list-item .list-name {
+        font-size: 0.8rem;
+    }
+    
+    .list-item .list-category {
+        font-size: 0.7rem;
+    }
+}
+
+/* Scrollable categories */
+.category-tabs-container {
+    scrollbar-width: thin;
+    scrollbar-color: #ef4444 #f1f1f1;
+}
+
+/* Hover effects for food items */
+.compact-card:hover .food-badge,
+.list-item:hover .food-badge {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Progress Bar Styles */
+.progress-bar {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#uploadProgress {
+    background: linear-gradient(90deg, #10b981, #34d399);
+    position: relative;
+    overflow: hidden;
+}
+
+#uploadProgress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Compression Stats */
+.compression-stats {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    border-left: 3px solid #10b981;
+}
+
+.compression-stats.error {
+    border-left-color: #ef4444;
+}
+
+.compression-stats p {
+    margin: 2px 0;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.compression-stats .label {
+    color: #6b7280;
+}
+
+.compression-stats .value {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+/* Upload Area States */
+#imageUploadArea.uploading {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+}
+
+#imageUploadArea.compressing {
+    border-color: #f59e0b;
+    background-color: #fffbeb;
+}
+
+#imageUploadArea.error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+/* Quality Indicator */
+.quality-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    margin-top: 4px;
+}
+
+.quality-badge.high {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.quality-badge.medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.quality-badge.low {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Loading animation for compression */
+.compression-loading {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #f3f4f6;
+    border-top: 2px solid #10b981;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 6px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===========================================
+   TABLE SCROLLING ISOLATION - ONLY TABLE SCROLLS
+   =========================================== */
+
+/* Parent container - FIXED height, NO scroll */
+.table-container {
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+/* Table wrapper - FIXED height, enables scroll ONLY for table */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden; /* Prevent vertical scroll */
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
+    position: relative;
+    max-height: 400px; /* Fixed height for mobile */
+}
+
+/* Table itself - Scrolls inside fixed wrapper */
+.table-wrapper table {
+    width: 100%;
+    min-width: 700px; /* Forces horizontal scroll */
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .table-wrapper {
+        max-height: 350px; /* Slightly shorter on mobile */
+    }
+    
+    /* Ensure parent containers don't scroll */
+    .bg-white.rounded-xl.shadow,
+    .bg-white.rounded-xl.shadow-sm,
+    .bg-white.rounded-xl {
+        overflow: hidden; /* Crucial: prevents parent from scrolling */
+    }
+    
+    /* Fix main content area */
+    #mainContent,
+    .lg\:col-span-3,
+    .lg\:col-span-4,
+    .lg\:col-span-5 {
+        overflow: visible !important; /* Don't restrict overflow */
+    }
+    
+    /* Fix the main grid container */
+    .container.mx-auto.px-4 {
+        overflow-x: hidden; /* Prevent horizontal scroll on page */
+    }
+    
+    /* Ensure body doesn't scroll when table does */
+    body.table-scrolling {
+        overflow-y: hidden;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .table-wrapper {
+        max-height: 300px;
+        min-width: 100%;
+    }
+    
+    .table-wrapper table {
+        min-width: 800px; /* Even wider for very small screens */
+    }
+}
+
+/* Desktop - taller tables */
+@media (min-width: 1025px) {
+    .table-wrapper {
+        max-height: 500px; /* Taller on desktop */
+        overflow-x: auto; /* Still allow horizontal scroll if needed */
+    }
+    
+    .table-wrapper table {
+        min-width: auto; /* Auto width on desktop */
+    }
+}
+
+/* Prevent table header from scrolling */
+.table-wrapper thead {
+    position: sticky;
+    top: 0;
+    background: #f9fafb;
+    z-index: 10;
+    box-shadow: 0 1px 0 #e5e7eb;
+}
+
+/* Scrollbar styling */
+.table-wrapper::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Firefox */
+.table-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* Table cell styling */
+.table-wrapper td,
+.table-wrapper th {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+/* First column can wrap */
+.table-wrapper td:first-child,
+.table-wrapper th:first-child {
+    white-space: normal;
+    min-width: 150px;
+}
+
+/* Scroll indicators */
+.scroll-indicator {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.5rem;
+    pointer-events: none;
+    opacity: 0.7;
+    animation: bounceRight 2s infinite;
+    z-index: 5;
+}
+
+@keyframes bounceRight {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    50% { transform: translateY(-50%) translateX(5px); }
+}
+
+/* Hide scroll indicator when not needed */
+.table-wrapper:not(.has-horizontal-scroll) .scroll-indicator {
+    display: none;
+}
+
+/* Touch-friendly scrolling */
+@media (max-width: 768px) {
+    .table-wrapper {
+        cursor: grab;
+    }
+    
+    .table-wrapper:active {
+        cursor: grabbing;
+    }
+}
+
+/* Loading overlay */
+#loadingOverlay {
+    transition: opacity 0.3s ease-out;
+}
+
+#loadingOverlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Offline indicator */
+#offlineIndicator {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Service Worker status */
+.sw-status {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    z-index: 1000;
+}
+
+/* Scroll boundary indicators */
+.table-wrapper.at-left::before,
+.table-wrapper.at-right::after {
+    opacity: 0 !important;
+}
+
+/* Left scroll indicator */
+.table-wrapper:not(.at-left)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.1), transparent);
+    pointer-events: none;
+    z-index: 5;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+/* Right scroll indicator */
+.table-wrapper:not(.at-right)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1));
+    pointer-events: none;
+    z-index: 5;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+/* Hide indicators when not scrolling */
+.table-wrapper:not(.has-horizontal-scroll)::before,
+.table-wrapper:not(.has-horizontal-scroll)::after {
+    display: none;
+}
+
+/* Significant scroll needs more prominent indicators */
+.table-wrapper.significant-scroll::before,
+.table-wrapper.significant-scroll::after {
+    width: 30px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.15), transparent);
+}
+
+.table-wrapper.significant-scroll::after {
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.15));
+}
+
+/* When table is scrolling, prevent body scroll */
+body.table-scrolling {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+/* Ensure table wrapper captures all touch events */
+.table-wrapper {
+    touch-action: pan-x; /* Allow only horizontal panning */
+}
+
+/* Fix for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    .table-wrapper {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    body.table-scrolling {
+        position: relative;
+        overflow: hidden;
+        height: 100vh;
+    }
+}
+
+/* Splash screen animation */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+#splashScreen.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+/* Ensure splash screen covers everything */
+#splashScreen {
+    z-index: 9999;
+}
+
+/* Mobile Cards Styling */
+@media (max-width: 768px) {
+    .table-wrapper {
+        display: none !important;
+    }
+    
+    .cards-container {
+        display: grid !important;
+    }
+    
+    .cards-container .card {
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Hide scroll indicator on mobile */
+    .scroll-indicator {
+        display: none !important;
+    }
+    
+    /* Better spacing for mobile cards */
+    .cards-container > div {
+        margin-bottom: 1rem;
+    }
+    
+    /* Status badges in cards */
+    .cards-container .bg-green-100,
+    .cards-container .bg-yellow-100,
+    .cards-container .bg-red-100,
+    .cards-container .bg-blue-100 {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    /* Action buttons in cards */
+    .cards-container .flex.space-x-2 {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .cards-container button {
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .cards-container button:hover {
+        background: #f3f4f6;
+    }
+}
+
+@media (min-width: 769px) {
+    .table-wrapper {
+        display: block !important;
+    }
+    
+    .cards-container {
+        display: none !important;
+    }
+}
+
+/* Special styling for products table cards */
+#productsTable + .cards-container .card {
+    display: flex;
+    align-items: flex-start;
+}
+
+#productsTable + .cards-container .card img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+}
+
+/* Staff table cards */
+#staffTable + .cards-container .card {
+    position: relative;
+}
+
+#staffTable + .cards-container .permissions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+/* Orders table cards */
+#ordersTable + .cards-container .status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+/* Recent orders cards */
+#recentOrders + .cards-container .card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Card hover effects */
+.cards-container .card {
+    transition: all 0.2s ease;
+}
+
+.cards-container .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo upload styles */
+.logo-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+#logoProgressSection .progress-bar {
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 6px;
+    margin-top: 8px;
+}
+
+#logoProgressSection .progress-bar div {
+    background: #10b981;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+#logoProgressSection .progress-text {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* css/table-styles.css */
+.table-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.table-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.table-card.active {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.table-card.occupied {
+    background-color: #fef3c7;
+}
+
+.table-card.available {
+    background-color: #f0fdf4;
+}
+
+.table-status {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.status-available {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-occupied {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-reserved {
+    background-color: #e0e7ff;
+    color: #3730a3;
+}
+
+.status-cleaning {
+    background-color: #fce7f3;
+    color: #9d174d;
+}
+
+.table-actions {
+    display: none;
+}
+
+.table-card:hover .table-actions {
+    display: flex;
+}
+
+.order-group {
+    border-left: 3px solid #ef4444;
+    background-color: #fafafa;
+}
+
+.order-group-header {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.order-time {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+/* Split bill styles */
+.split-bill-item {
+    border: 1px dashed #cbd5e1;
+    background-color: #f8fafc;
+}
+
+/* Premium Loader Animations */
+.premium-loader-spin {
+    animation: spin-slow 3s linear infinite;
+}
+
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.premium-pulse {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-slow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .8; transform: scale(1.05); }
+}
+
+.premium-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Mobile Bottom Navigation */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom);
+    height: 65px;
+    border-top: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item:active {
+    transform: scale(0.95);
+}
+
+.mobile-nav-item.active {
+    color: #ef4444;
+}
+
+.mobile-nav-item i {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-item.active i {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 4px 6px rgba(239, 68, 68, 0.2));
+}
+
+.mobile-nav-item span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* Floating Action Button in Nav */
+.mobile-nav-fab {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    border: 4px solid white;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.mobile-nav-item.active .mobile-nav-fab {
+    box-shadow: 0 12px 25px rgba(239, 68, 68, 0.5);
+    transform: translateX(-50%) translateY(-4px);
+}
+
+.mobile-nav-fab i {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    transform: none !important;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 1024px) {
+    .mobile-bottom-nav {
+        display: flex;
+    }
+    
+    /* Adjust body padding */
+    body {
+        padding-bottom: 80px !important;
+    }
+    
+    /* Ensure sidebar is hidden on mobile */
+    #sidebar {
+        display: none !important;
+    }
+}
+
+/* Ensure sidebar is visible on desktop */
+@media (min-width: 1024px) {
+    #sidebar {
+        display: block !important;
+    }
+}

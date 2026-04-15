@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Orders - MNRFoodBill</title>
+    <!-- Favicon -->
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png">
+    <!-- iOS PWA Icons -->
+    <link rel="apple-touch-icon" href="ios/180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="ios/152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="ios/167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ios/180.png">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MNRFoodBill">
+    
+    <!-- External CSS -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js" defer></script>
+    <script src="js/layout.js" defer></script>
+    <script src="js/orders.js" defer></script>
+    <script src="js/print.js" defer></script>
+    <script src="js/table-responsive.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative w-32 h-32 mb-8">
+            <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full premium-loader-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-3 rounded-full shadow-sm premium-pulse">
+                    <i class="fas fa-utensils text-3xl text-red-500"></i>
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 premium-float" style="animation-delay: 0s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-file-invoice-dollar text-yellow-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 transform -translate-x-1/4 translate-y-1/4 premium-float" style="animation-delay: 1.5s;">
+                <div class="bg-white p-2 rounded-lg shadow-md border border-gray-100">
+                    <i class="fas fa-concierge-bell text-gray-700 text-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl font-bold text-gray-800 tracking-widest uppercase">MNR<span class="text-red-500">FoodBill</span></h2>
+            <div class="flex items-center justify-center space-x-2 text-gray-400 text-sm">
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            </div>
+            <p class="text-gray-400 text-xs font-medium tracking-wide uppercase mt-2">Premium Restaurant POS</p>
+        </div>
+    </div>
+
+    <!-- Header (loaded via layout.js) -->
+    <div id="header"></div>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar (loaded via layout.js) -->
+            <div id="sidebar" class="hidden lg:block lg:col-span-1"></div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Order History</h1>
+                
+                <!-- Filters -->
+                <div class="bg-white rounded-xl shadow p-4 mb-6">
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Date Range</label>
+                            <input type="date" id="startDate" class="px-4 py-2 border border-gray-300 rounded-lg">
+                            <span class="mx-2">to</span>
+                            <input type="date" id="endDate" class="px-4 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 mb-2">Status</label>
+                            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg">
+                                <option value="all">All Orders</option>
+                                <option value="completed">Completed</option>
+                                <option value="saved">Saved</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <button id="applyFilter" class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 mt-6">
+                            <i class="fas fa-filter mr-2"></i> Apply
+                        </button>
+                        
+                        <button id="resetFilter" class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 mt-6">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Today's Orders</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="todayOrdersCount">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shopping-bag text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Today's Revenue</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="todayRevenue">₹0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-rupee-sign text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Average Order Value</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="avgOrderValue">₹0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="bg-white rounded-xl shadow overflow-hidden p-4">
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <div class="scroll-indicator">→</div>
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left">Order ID</th>
+                                        <th class="py-3 px-4 text-left">Time</th>
+                                        <th class="py-3 px-4 text-left">Customer</th>
+                                        <th class="py-3 px-4 text-left">Items</th>
+                                        <th class="py-3 px-4 text-left">Amount</th>
+                                        <th class="py-3 px-4 text-left">Status</th>
+                                        <th class="py-3 px-4 text-left">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTable">
+                                    <tr>
+                                        <td colspan="7" class="text-center py-8 text-gray-500">
+                                            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-red-500 mr-2"></div>
+                                            Loading orders...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-6 flex justify-center">
+                    <nav class="flex space-x-2">
+                        <button id="prevPage" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="pageInfo" class="px-4 py-2">Page 1 of 1</span>
+                        <button id="nextPage" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl relative">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">Order Details</h3>
+                        <button onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="orderDetails" class="space-y-4">
+                        <!-- Order details will be loaded here -->
+                    </div>
+                    
+                    <div class="mt-6 flex space-x-3">
+                        <button onclick="printOrderReceipt()" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600">
+                            <i class="fas fa-print mr-2"></i> Print Receipt
+                        </button>
+                        <button onclick="closeOrderModal()" class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteOrderModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md relative">
+                <div class="p-6">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 text-center mb-2">Delete Order</h3>
+                    <p class="text-gray-600 text-center mb-6">Are you sure you want to delete this order? This action cannot be undone.</p>
+                    <div class="flex space-x-3">
+                        <button id="confirmDeleteOrder" 
+                                class="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600">
+                            Yes, Delete
+                        </button>
+                        <button onclick="closeDeleteOrderModal()"
+                                class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md relative">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Print Receipt</h3>
+                    <div id="printContent" class="font-mono text-sm whitespace-pre-line mb-6 p-4 bg-gray-50 rounded-lg overflow-y-auto max-h-96">
+                        <!-- Receipt content will be here -->
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="printHistoryOrder()" class="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600">
+                            <i class="fas fa-print mr-2"></i> Print Now
+                        </button>
+                        <button onclick="closePrintModal()" class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-50">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Worker and Initialization -->
+    <script>
+        // iOS PWA boot script — overlay + single SW registration
+        (function() {
+            function hideOverlay() {
+                var overlay = document.getElementById('loadingOverlay');
+                if (!overlay || overlay.dataset.hidden) return;
+                overlay.dataset.hidden = '1';
+                overlay.style.transition = 'opacity 0.4s ease';
+                overlay.style.opacity = '0';
+                setTimeout(function() { overlay.style.display = 'none'; }, 450);
+            }
+            window.addEventListener('load', function() { setTimeout(hideOverlay, 600); });
+            document.addEventListener('DOMContentLoaded', function() { setTimeout(hideOverlay, 3000); });
+            setTimeout(hideOverlay, 6000);
+        })();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function(reg) { console.log('[SW] Registered, scope:', reg.scope); })
+                .catch(function(err) { console.error('[SW] Registration failed:', err); });
+        }
+    </script>
+</body>
+</html>
