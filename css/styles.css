@@ -1949,6 +1949,8 @@ body.table-scrolling {
     padding-bottom: env(safe-area-inset-bottom);
     height: 65px;
     border-top: 1px solid rgba(229, 231, 235, 0.5);
+    align-items: stretch;
+    justify-content: space-between;
 }
 
 .mobile-nav-item {
@@ -1962,6 +1964,10 @@ body.table-scrolling {
     position: relative;
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
+    min-width: 0;
+    height: 100%;
+    padding: 8px 4px 10px;
+    gap: 2px;
 }
 
 .mobile-nav-item:active {
@@ -1987,6 +1993,20 @@ body.table-scrolling {
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.02em;
+    line-height: 1;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.mobile-nav-item-center {
+    justify-content: flex-end;
+    padding-top: 0;
+    padding-bottom: 8px;
+}
+
+.mobile-nav-item-center span {
+    margin-top: auto;
+    padding-top: 28px;
 }
 
 /* Floating Action Button in Nav */
@@ -2034,6 +2054,29 @@ body.table-scrolling {
     /* Ensure sidebar is hidden on mobile */
     #sidebar {
         display: none !important;
+    }
+}
+
+@media (max-width: 420px) {
+    .mobile-bottom-nav {
+        height: 68px;
+    }
+
+    .mobile-nav-item {
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .mobile-nav-item i {
+        font-size: 1.1rem;
+    }
+
+    .mobile-nav-item span {
+        font-size: 9px;
+    }
+
+    .mobile-nav-item-center span {
+        padding-top: 30px;
     }
 }
 
