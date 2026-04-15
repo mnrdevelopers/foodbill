@@ -15,7 +15,14 @@ let tableRestaurantSettings = {
     address: '',
     phone: '',
     gstin: '',
-    fssai: ''
+    fssai: '',
+    printingMode: 'auto',
+    printerSize: '58mm',
+    usbVendorId: '',
+    usbProductId: '',
+    usbSerialNumber: '',
+    usbManufacturerName: '',
+    usbProductName: ''
 };
 
 class TableOrder {
@@ -204,14 +211,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         serviceCharge: Number(settings.serviceCharge) || 0,
                         currency: settings.currency || '₹',
                         restaurantName: data.name || 'Restaurant',
-                        address: data.address || '',
-                        phone: data.phone || '',
+                        address: settings.address || data.address || '',
+                        phone: settings.phone || data.phone || '',
                         gstin: settings.gstin || '',
                         fssai: settings.fssai || '',
                         ownerPhone: data.ownerPhone || data.phone || '',
                         ownerPhone2: data.ownerPhone2 || '',
                         upiId: settings.upiId || '',
-                        printerSize: settings.printerSize || '58mm'
+                        printerSize: settings.printerSize || '58mm',
+                        printingMode: settings.printingMode || 'auto',
+                        usbVendorId: settings.usbVendorId || '',
+                        usbProductId: settings.usbProductId || '',
+                        usbSerialNumber: settings.usbSerialNumber || '',
+                        usbManufacturerName: settings.usbManufacturerName || '',
+                        usbProductName: settings.usbProductName || ''
                     };
                     
                     console.log("Loaded restaurant settings:", tableRestaurantSettings);
@@ -259,11 +272,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         tables.forEach(table => {
-            const tableElement = document.createElement('div');
-            tableElement.className = `table-card rounded-xl shadow-lg p-4 cursor-pointer transition-all duration-300 hover:shadow-xl ${getTableStatusClass(table.status)}`;
-            
             // Check if table has active orders
             const hasActiveOrders = activeTableOrders.some(order => order.tableId === table.id && !order.closed);
+            const effectiveStatus = hasActiveOrders
+                ? 'occupied'
+                : (table.status === 'occupied' ? 'available' : table.status);
+
+            const tableElement = document.createElement('div');
+            tableElement.className = `table-card rounded-xl shadow-lg p-4 cursor-pointer transition-all duration-300 hover:shadow-xl ${getTableStatusClass(effectiveStatus)}`;
             
             tableElement.innerHTML = `
                 <div class="flex justify-between items-start mb-3">
@@ -272,8 +288,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="text-sm text-gray-600">${table.capacity} persons</p>
                     </div>
                     <div class="flex flex-col items-end">
-                        <span class="status-badge px-2 py-1 rounded-full text-xs font-medium mb-2 ${getTableStatusColor(table.status)}">
-                            ${table.status}
+                        <span class="status-badge px-2 py-1 rounded-full text-xs font-medium mb-2 ${getTableStatusColor(effectiveStatus)}">
+                            ${effectiveStatus}
                         </span>
                         ${hasActiveOrders ? `
                             <span class="active-order-badge px-2 py-1 bg-orange-500 text-white rounded-full text-xs font-medium">
@@ -288,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-${table.type === 'outdoor' ? 'sun' : table.type === 'private' ? 'door-closed' : 'home'} text-gray-400 mr-1"></i>
                         <span class="text-gray-600">${table.type}</span>
                     </div>
-                    ${table.status === 'occupied' || hasActiveOrders ? `
+                    ${hasActiveOrders ? `
                         <button class="view-order-btn text-blue-600 hover:text-blue-800 text-sm font-medium" data-id="${table.id}">
                             View Order
                         </button>
@@ -398,11 +414,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show modal
         document.getElementById('tableOrderModal').classList.remove('hidden');
-        
-        // Update table status to occupied if not already
-        if (table.status !== 'occupied') {
-            await updateTableStatus(table.id, 'occupied');
-        }
         
         // Update order summary
         updateTableOrderSummary();
@@ -671,6 +682,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (serviceLabel) serviceLabel.textContent = `Service Charge (${tableRestaurantSettings.serviceCharge}%)`;
     }
 
+    function syncTableOrderPartyDetailsFromForm() {
+        if (!currentTableOrder) return;
+
+        const personsInput = parseInt(document.getElementById('tablePersons')?.value, 10);
+        currentTableOrder.currentOrder.customerName =
+            document.getElementById('tableCustomerName')?.value || 'Guest';
+        currentTableOrder.currentOrder.customerPhone =
+            document.getElementById('tableCustomerPhone')?.value || '';
+        currentTableOrder.currentOrder.persons =
+            Number.isFinite(personsInput) && personsInput > 0 ? personsInput : 2;
+    }
+
     // Load table order from Firebase
     async function loadTableOrder(tableId) {
         const resId = tableRestaurantId || auth.currentUser?.uid;
@@ -732,13 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Get customer info from inputs
-        currentTableOrder.currentOrder.customerName = 
-            document.getElementById('tableCustomerName').value || 'Guest';
-        currentTableOrder.currentOrder.customerPhone = 
-            document.getElementById('tableCustomerPhone').value || '';
-        currentTableOrder.currentOrder.persons = 
-            parseInt(document.getElementById('tablePersons').value) || 2;
+        syncTableOrderPartyDetailsFromForm();
 
         // Save the current order
         const savedOrder = currentTableOrder.saveOrder();
@@ -769,19 +786,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Print bill and close table
     document.getElementById('printTableBillBtn')?.addEventListener('click', async function() {
         if (!currentTableOrder) return;
+        syncTableOrderPartyDetailsFromForm();
         
         // Check if there's an unsaved current order
         if (currentTableOrder.currentOrder.items.length > 0) {
             const confirmSave = confirm('You have unsaved items. Save them before printing bill?');
             if (confirmSave) {
                 // Save current order first
-                currentTableOrder.currentOrder.customerName = 
-                    document.getElementById('tableCustomerName').value || 'Guest';
-                currentTableOrder.currentOrder.customerPhone = 
-                    document.getElementById('tableCustomerPhone').value || '';
-                currentTableOrder.currentOrder.persons = 
-                    parseInt(document.getElementById('tablePersons').value) || 2;
-                
                 currentTableOrder.saveOrder();
                 await saveTableOrderToFirebase(currentTableOrder);
             }
@@ -794,6 +805,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function saveTableOrderToFirebase(tableOrder) {
         const resId = tableRestaurantId || auth.currentUser?.uid;
         if (!resId) throw new Error('No restaurantId');
+        const shouldMarkOccupied = (tableOrder.orders?.length || 0) > 0 || (tableOrder.currentOrder?.items?.length || 0) > 0;
         
         const orderData = {
             restaurantId: resId,
@@ -813,6 +825,10 @@ document.addEventListener('DOMContentLoaded', function() {
             tableOrder.firebaseDocId = docRef.id;
         } else {
             await db.collection('tableOrders').doc(tableOrder.firebaseDocId).update(orderData);
+        }
+
+        if (shouldMarkOccupied) {
+            await updateTableStatus(tableOrder.tableId, 'occupied');
         }
         
         return tableOrder.firebaseDocId;
@@ -1085,6 +1101,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             try {
+                syncTableOrderPartyDetailsFromForm();
+
                 // Generate Bill No
                 const billNo = await window.OrderCounter?.getNextOrderId() || `TBL${Date.now().toString().substr(-8)}`;
 
@@ -1137,28 +1155,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function createMainOrderRecord(tableOrder, result, billNo) {
-        const user = auth.currentUser;
+        const resId = tableRestaurantId || auth.currentUser?.uid;
+        if (!resId) throw new Error('No restaurantId');
         
         // Flatten all items from all orders
         const allItems = tableOrder.orders.flatMap(order => order.items);
+        const subtotal = tableOrder.orders.reduce((sum, order) => {
+            if (typeof order.subtotal === 'number') return sum + order.subtotal;
+            return sum + (order.items || []).reduce((itemSum, item) => itemSum + ((item.price || 0) * (item.quantity || 0)), 0);
+        }, 0);
+        const gstAmount = tableOrder.orders.reduce((sum, order) => sum + (Number(order.gstAmount) || 0), 0);
+        const serviceCharge = tableOrder.orders.reduce((sum, order) => sum + (Number(order.serviceCharge) || 0), 0);
+        const grandTotal = Number(result?.grandTotal) || Number(tableOrder.totalAmount) || subtotal + gstAmount + serviceCharge;
         
         // Use the provided billNo for both orderId and billNo to ensure consistency
         const finalOrderId = billNo || `TBL${Date.now().toString().substr(-8)}`;
 
         const orderData = {
-            restaurantId: user.uid,
+            restaurantId: resId,
             tableId: tableOrder.tableId,
             tableName: tableOrder.tableName,
             items: allItems,
             customerName: tableOrder.currentOrder.customerName,
             customerPhone: tableOrder.currentOrder.customerPhone,
             persons: tableOrder.currentOrder.persons,
-            subtotal: tableOrder.totalAmount,
+            subtotal: subtotal,
             gstRate: tableRestaurantSettings.gstRate,
-            gstAmount: tableOrder.totalAmount * (tableRestaurantSettings.gstRate / 100),
+            gstAmount: gstAmount,
             serviceChargeRate: tableRestaurantSettings.serviceCharge,
-            serviceCharge: tableOrder.totalAmount * (tableRestaurantSettings.serviceCharge / 100),
-            total: tableOrder.totalAmount,
+            serviceCharge: serviceCharge,
+            total: grandTotal,
             paymentMethod: result.paymentMethod,
             cashReceived: result.cashReceived || 0,
             changeAmount: result.changeAmount || 0,
@@ -1172,16 +1198,41 @@ document.addEventListener('DOMContentLoaded', function() {
         await db.collection('orders').add(orderData);
     }
 
-    function printTableReceipt(tableOrder, result, paymentMethod, cashReceived, billNo) {
+    async function printTableReceipt(tableOrder, result, paymentMethod, cashReceived, billNo) {
         // Generate professional receipt
         const receipt = generateProfessionalReceipt(tableOrder, result, paymentMethod, cashReceived, billNo);
-        
-        if (isMobileDevice()) {
-            shareToRawBT(receipt, billNo, tableRestaurantSettings.restaurantName);
-        } else {
-            // Show print modal
-            showPrintModal(receipt, tableRestaurantSettings.upiId, result.grandTotal || tableOrder.totalAmount, tableRestaurantSettings.printerSize);
+        const printSettings = {
+            printingMode: tableRestaurantSettings.printingMode || 'auto',
+            printerSize: tableRestaurantSettings.printerSize || '58mm',
+            usbVendorId: tableRestaurantSettings.usbVendorId || '',
+            usbProductId: tableRestaurantSettings.usbProductId || '',
+            usbSerialNumber: tableRestaurantSettings.usbSerialNumber || '',
+            usbManufacturerName: tableRestaurantSettings.usbManufacturerName || '',
+            usbProductName: tableRestaurantSettings.usbProductName || ''
+        };
+
+        if (window.UsbPrinter?.shouldAttemptUsb(printSettings)) {
+            try {
+                await window.UsbPrinter.printText(receipt, printSettings, { requestIfNeeded: false });
+                showNotification('Receipt sent to USB printer!', 'success');
+                return;
+            } catch (error) {
+                console.error('USB print failed:', error);
+                showNotification(`USB print failed: ${error.message}`, 'error');
+            }
         }
+
+        const fallbackMode = printSettings.printingMode === 'rawbt' || (printSettings.printingMode !== 'browser' && isMobileDevice())
+            ? 'rawbt'
+            : 'browser';
+
+        if (fallbackMode === 'rawbt') {
+            await shareToRawBT(receipt, billNo, tableRestaurantSettings.restaurantName);
+            return;
+        }
+
+        // Show print modal
+        showPrintModal(receipt, tableRestaurantSettings.upiId, result.grandTotal || tableOrder.totalAmount, tableRestaurantSettings.printerSize);
     }
 
     function isMobileDevice() {
@@ -1314,12 +1365,15 @@ document.addEventListener('DOMContentLoaded', function() {
         receipt += centerText('BILL SUMMARY') + '\n';
         receipt += '-'.repeat(MAX_WIDTH) + '\n';
         
-        const subtotal = tableOrder.totalAmount;
+        const subtotal = tableOrder.orders.reduce((sum, order) => {
+            if (typeof order.subtotal === 'number') return sum + order.subtotal;
+            return sum + (order.items || []).reduce((itemSum, item) => itemSum + ((item.price || 0) * (item.quantity || 0)), 0);
+        }, 0);
         const gstRate = tableRestaurantSettings.gstRate;
         const serviceRate = tableRestaurantSettings.serviceCharge;
-        const gstAmount = subtotal * (gstRate / 100);
-        const serviceCharge = subtotal * (serviceRate / 100);
-        const total = subtotal + gstAmount + serviceCharge;
+        const gstAmount = tableOrder.orders.reduce((sum, order) => sum + (Number(order.gstAmount) || 0), 0);
+        const serviceCharge = tableOrder.orders.reduce((sum, order) => sum + (Number(order.serviceCharge) || 0), 0);
+        const total = Number(result?.grandTotal) || Number(tableOrder.totalAmount) || subtotal + gstAmount + serviceCharge;
         
         receipt += formatLine('Sub Total', `${currency}${subtotal.toFixed(2)}`) + '\n';
         
@@ -1344,7 +1398,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (paymentMethod === 'cash') {
             receipt += `Cash Received: ${currency}${cashReceived.toFixed(2)}\n`;
-            const change = Math.max(0, cashReceived - total);
+            const change = Number(result?.changeAmount) || Math.max(0, cashReceived - total);
             receipt += `Change       : ${currency}${change.toFixed(2)}\n`;
         } else {
             receipt += `Paid Amount  : ${currency}${total.toFixed(2)}\n`;
@@ -1672,7 +1726,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('tableForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const user = auth.currentUser;
+        const resId = tableRestaurantId || auth.currentUser?.uid;
+        if (!resId) {
+            showNotification('Unable to determine restaurant for this table', 'error');
+            return;
+        }
         const tableId = document.getElementById('tableId').value;
         const tableNumber = document.getElementById('tableName').value;
         const capacity = parseInt(document.getElementById('tableCapacity').value);
@@ -1685,7 +1743,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: type,
             description: description,
             status: 'available',
-            restaurantId: user.uid,
+            restaurantId: resId,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         

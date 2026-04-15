@@ -61,14 +61,19 @@ async function prepareReceipt() {
             cgstAmount, sgstAmount, MAX_WIDTH
         );
         
-        // Check if mobile or desktop
-        if (isMobileDevice()) {
-            // MOBILE: Send to RawBT
-            await shareToRawBT(receipt, billNo, restaurant.name);
-        } else {
-            // DESKTOP: Show print modal
-            showDesktopPrintModal(receipt, restaurant.name, billNo, restaurant.upiId, total, printerSize);
+        const usbPrinted = await tryUsbReceiptPrint(receipt, settings);
+        if (usbPrinted) {
+            await saveOrderAndClearCart(billNo);
+            return;
         }
+
+        const fallbackMode = getReceiptFallbackMode(settings);
+        if (fallbackMode === 'rawbt') {
+            await shareToRawBT(receipt, billNo, restaurant.name);
+            return;
+        }
+
+        showDesktopPrintModal(receipt, restaurant.name, billNo, restaurant.upiId, total, printerSize);
         
     } catch (error) {
         console.error("Error preparing receipt:", error);
@@ -208,6 +213,35 @@ function buildReceipt(restaurant, customerName, customerPhone,
     receipt += '\n\n';
     
     return receipt;
+}
+
+function getReceiptPrintMode(settings = {}) {
+    return window.UsbPrinter?.getPreferredMode(settings) || 'auto';
+}
+
+function getReceiptFallbackMode(settings = {}) {
+    const mode = getReceiptPrintMode(settings);
+
+    if (mode === 'rawbt') return 'rawbt';
+    if (mode === 'browser') return 'browser';
+
+    return isMobileDevice() ? 'rawbt' : 'browser';
+}
+
+async function tryUsbReceiptPrint(receiptText, settings, successMessage = 'Receipt sent to USB printer!') {
+    if (!window.UsbPrinter?.shouldAttemptUsb(settings)) {
+        return false;
+    }
+
+    try {
+        await window.UsbPrinter.printText(receiptText, settings, { requestIfNeeded: false });
+        showNotification(successMessage, 'success');
+        return true;
+    } catch (error) {
+        console.error('USB print failed:', error);
+        showNotification(`USB print failed: ${error.message}`, 'error');
+        return false;
+    }
 }
 
 // MOBILE: RawBT Functions

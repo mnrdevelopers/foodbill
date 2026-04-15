@@ -378,9 +378,22 @@ ${(restaurant.ownerPhone || restaurant.ownerPhone2) ? `\nContact Owner:\n${resta
 *** DUPLICATE COPY ***
 `;
         
-        // Mobile Printing Logic (RawBT)
+        const printMode = window.UsbPrinter?.getPreferredMode(settings) || 'auto';
+        if (window.UsbPrinter?.shouldAttemptUsb(settings)) {
+            try {
+                await window.UsbPrinter.printText(receipt, settings, { requestIfNeeded: false });
+                showNotification('Receipt sent to USB printer!', 'success');
+                closeOrderModal();
+                return;
+            } catch (error) {
+                console.error('USB print failed:', error);
+                showNotification(`USB print failed: ${error.message}`, 'error');
+            }
+        }
+
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
+        const useRawBt = printMode === 'rawbt' || (printMode !== 'browser' && isMobile);
+        if (useRawBt) {
             const billNo = selectedOrder.orderId || selectedOrder.id;
             const fileName = `receipt_${billNo}.txt`;
             const file = new File([receipt], fileName, { type: 'text/plain' });

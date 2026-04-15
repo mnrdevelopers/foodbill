@@ -26,6 +26,56 @@ document.addEventListener('DOMContentLoaded', function() {
         if (el) el.value = val || '';
     };
 
+    const getPrintSettingsFromForm = () => ({
+        printingMode: getVal('printingMode') || 'auto',
+        printerSize: getVal('printerSize') || '58mm',
+        usbVendorId: getVal('usbVendorId') || '',
+        usbProductId: getVal('usbProductId') || '',
+        usbSerialNumber: getVal('usbSerialNumber') || '',
+        usbManufacturerName: getVal('usbManufacturerName') || '',
+        usbProductName: getVal('usbPrinterName') || ''
+    });
+
+    const setUsbPrinterFields = (deviceMeta = {}) => {
+        setVal('usbVendorId', deviceMeta.usbVendorId);
+        setVal('usbProductId', deviceMeta.usbProductId);
+        setVal('usbSerialNumber', deviceMeta.usbSerialNumber);
+        setVal('usbManufacturerName', deviceMeta.usbManufacturerName);
+        setVal('usbPrinterName', deviceMeta.usbProductName || deviceMeta.usbManufacturerName || '');
+        refreshUsbPrinterStatus();
+    };
+
+    function refreshUsbPrinterStatus() {
+        const statusEl = document.getElementById('usbPrinterStatus');
+        const connectBtn = document.getElementById('connectUsbPrinterBtn');
+        const testBtn = document.getElementById('testUsbPrinterBtn');
+        const printerName = getVal('usbPrinterName');
+        const serialNumber = getVal('usbSerialNumber');
+        const isUsbSupported = !!window.UsbPrinter?.isSupported();
+
+        if (connectBtn) connectBtn.disabled = !isUsbSupported;
+        if (testBtn) testBtn.disabled = !isUsbSupported;
+
+        if (!statusEl) return;
+
+        if (!isUsbSupported) {
+            statusEl.textContent = 'WebUSB is unavailable here. Use a secure Chromium browser or installed Chromium PWA.';
+            statusEl.className = 'text-xs text-amber-600';
+            return;
+        }
+
+        if (printerName) {
+            statusEl.textContent = serialNumber
+                ? `Paired: ${printerName} (${serialNumber})`
+                : `Paired: ${printerName}`;
+            statusEl.className = 'text-xs text-green-600';
+            return;
+        }
+
+        statusEl.textContent = 'No printer paired yet.';
+        statusEl.className = 'text-xs text-gray-500';
+    }
+
     // Load existing logo on page load
     if (typeof LogoUpload !== 'undefined' && LogoUpload.setLogoForEdit) {
         const logoUrlInput = document.getElementById('restaurantLogoUrl');
@@ -33,6 +83,8 @@ document.addEventListener('DOMContentLoaded', function() {
             LogoUpload.setLogoForEdit(logoUrlInput.value);
         }
     }
+
+    refreshUsbPrinterStatus();
 
     async function loadSettings() {
         const user = auth.currentUser;
@@ -57,21 +109,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 setVal('resGSTIN', settings.gstin);
                 setVal('resFSSAI', settings.fssai);
                 setVal('resUpiId', settings.upiId);
-
-                // Inject Printer Settings if not exists
-                if (!document.getElementById('printerSize')) {
-                    const upiInput = document.getElementById('resUpiId');
-                    if (upiInput) {
-                        const printerDiv = document.createElement('div');
-                        printerDiv.className = 'mb-4';
-                        printerDiv.innerHTML = `
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Printer Paper Size</label>
-                            <select id="printerSize" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"><option value="58mm">58mm (Standard)</option><option value="80mm">80mm (Wide)</option></select>
-                        `;
-                        upiInput.parentElement.insertAdjacentElement('afterend', printerDiv);
-                    }
-                }
+                setVal('printingMode', settings.printingMode || 'auto');
                 setVal('printerSize', settings.printerSize || '58mm');
+                setUsbPrinterFields({
+                    usbVendorId: settings.usbVendorId || '',
+                    usbProductId: settings.usbProductId || '',
+                    usbSerialNumber: settings.usbSerialNumber || '',
+                    usbManufacturerName: settings.usbManufacturerName || '',
+                    usbProductName: settings.usbProductName || ''
+                });
                 
                 // Owner info
                 setVal('ownerName', data.ownerName);
@@ -101,6 +147,82 @@ document.addEventListener('DOMContentLoaded', function() {
             showNotification('Failed to load settings', 'error');
         }
     }
+
+    document.getElementById('connectUsbPrinterBtn')?.addEventListener('click', async function() {
+        if (!window.UsbPrinter?.isSupported()) {
+            showNotification('WebUSB is not available on this device/browser', 'error');
+            refreshUsbPrinterStatus();
+            return;
+        }
+
+        const button = this;
+        const originalHtml = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Pairing...';
+
+        try {
+            const deviceMeta = await window.UsbPrinter.pairPrinter();
+            setUsbPrinterFields(deviceMeta);
+            if (!getVal('printingMode') || getVal('printingMode') === 'auto') {
+                setVal('printingMode', 'usb');
+            }
+            showNotification('USB printer paired. Save settings to keep it for future prints.', 'success');
+        } catch (error) {
+            if (error.name !== 'NotFoundError') {
+                console.error('USB pair error:', error);
+                showNotification(error.message || 'Unable to pair printer', 'error');
+            }
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalHtml;
+            refreshUsbPrinterStatus();
+        }
+    });
+
+    document.getElementById('testUsbPrinterBtn')?.addEventListener('click', async function() {
+        if (!window.UsbPrinter?.isSupported()) {
+            showNotification('WebUSB is not available on this device/browser', 'error');
+            refreshUsbPrinterStatus();
+            return;
+        }
+
+        const settings = getPrintSettingsFromForm();
+        const printerName = settings.usbProductName || 'Thermal Printer';
+        const sampleReceipt = [
+            '==========================================',
+            '           MNRFOODBILL TEST PRINT         ',
+            '==========================================',
+            `Printer : ${printerName}`,
+            `Mode    : ${settings.printingMode || 'usb'}`,
+            `Paper   : ${settings.printerSize || '58mm'}`,
+            `Date    : ${new Date().toLocaleString('en-IN')}`,
+            '------------------------------------------',
+            'If this prints clearly, direct USB is ready.',
+            'Save the settings screen to keep this setup.',
+            '=========================================='
+        ].join('\n');
+
+        const button = this;
+        const originalHtml = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Printing...';
+
+        try {
+            await window.UsbPrinter.printText(sampleReceipt, settings, { requestIfNeeded: true });
+            if (!getVal('usbPrinterName')) {
+                const authorizedDevice = await window.UsbPrinter.getAuthorizedDevice(settings, { requestIfNeeded: false });
+                setUsbPrinterFields(window.UsbPrinter.getDeviceMeta(authorizedDevice));
+            }
+            showNotification('Test receipt sent to USB printer', 'success');
+        } catch (error) {
+            console.error('USB test print failed:', error);
+            showNotification(error.message || 'USB test print failed', 'error');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalHtml;
+            refreshUsbPrinterStatus();
+        }
+    });
 
     if (settingsForm) {
         settingsForm.addEventListener('submit', async function(e) {
@@ -132,6 +254,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     fssai: getVal('resFSSAI'),
                     upiId: getVal('resUpiId'),
                     printerSize: getVal('printerSize') || '58mm',
+                    printingMode: getVal('printingMode') || 'auto',
+                    usbVendorId: getVal('usbVendorId') || '',
+                    usbProductId: getVal('usbProductId') || '',
+                    usbSerialNumber: getVal('usbSerialNumber') || '',
+                    usbManufacturerName: getVal('usbManufacturerName') || '',
+                    usbProductName: getVal('usbPrinterName') || '',
                     logoUrl: logoUrl // Add logo URL to settings
                 },
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
