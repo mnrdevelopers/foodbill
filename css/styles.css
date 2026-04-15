@@ -69,11 +69,7 @@
         padding-left: 1rem;
         padding-right: 1rem;
     }
-    
-    .grid {
-        grid-template-columns: 1fr !important;
-    }
-    
+
     table {
         font-size: 14px;
     }
@@ -339,15 +335,7 @@ body.sidebar-open {
         padding-left: 1rem;
         padding-right: 1rem;
     }
-    
-    .grid {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .lg\:col-span-3 {
-        grid-column: span 1;
-    }
-    
+
     .sticky {
         position: static;
     }
@@ -1947,7 +1935,7 @@ body.table-scrolling {
     box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
     z-index: 9999;
     padding-bottom: env(safe-area-inset-bottom);
-    height: 65px;
+    height: 72px;
     border-top: 1px solid rgba(229, 231, 235, 0.5);
     align-items: stretch;
     justify-content: space-between;
@@ -1976,6 +1964,22 @@ body.table-scrolling {
 
 .mobile-nav-item.active {
     color: #ef4444;
+}
+
+.mobile-nav-item.active span {
+    color: #dc2626;
+}
+
+.mobile-nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 28px;
+    height: 3px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+    transform: translateX(-50%);
 }
 
 .mobile-nav-item i {
@@ -2048,7 +2052,7 @@ body.table-scrolling {
     
     /* Adjust body padding */
     body {
-        padding-bottom: 80px !important;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
     }
     
     /* Ensure sidebar is hidden on mobile */
@@ -2059,7 +2063,7 @@ body.table-scrolling {
 
 @media (max-width: 420px) {
     .mobile-bottom-nav {
-        height: 68px;
+        height: 74px;
     }
 
     .mobile-nav-item {

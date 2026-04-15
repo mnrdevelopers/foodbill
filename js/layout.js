@@ -200,6 +200,7 @@ function loadHeader() {
         .then(response => response.text())
         .then(html => {
             document.getElementById('header').innerHTML = html;
+            updateActiveLink();
             attachHeaderEvents();
         })
         .catch(err => {
@@ -474,17 +475,19 @@ function performLogout() {
 }
 
 function updateActiveLink() {
-    const currentPage = window.location.pathname.split('/').pop();
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const sidebarLinks = document.querySelectorAll('#sidebar a');
     const mobileLinks = document.querySelectorAll('#mobileSidebar a');
     const bottomNavLinks = document.querySelectorAll('.mobile-bottom-nav a');
+    const normalizeHref = (href) => (href || '').split('?')[0].split('#')[0];
+    const normalizedCurrentPage = normalizeHref(currentPage);
     
     sidebarLinks.forEach(link => {
         link.classList.remove('bg-red-50', 'text-red-600');
         link.classList.add('text-gray-600', 'hover:bg-gray-50');
         
-        const linkHref = link.getAttribute('href');
-        if (linkHref === currentPage) {
+        const linkHref = normalizeHref(link.getAttribute('href'));
+        if (linkHref === normalizedCurrentPage) {
             link.classList.remove('text-gray-600', 'hover:bg-gray-50');
             link.classList.add('bg-red-50', 'text-red-600');
         }
@@ -493,16 +496,16 @@ function updateActiveLink() {
     mobileLinks.forEach(link => {
         link.classList.remove('bg-red-50', 'text-red-600');
         
-        const linkHref = link.getAttribute('href');
-        if (linkHref === currentPage) {
+        const linkHref = normalizeHref(link.getAttribute('href'));
+        if (linkHref === normalizedCurrentPage) {
             link.classList.add('bg-red-50', 'text-red-600');
         }
     });
 
     bottomNavLinks.forEach(link => {
         link.classList.remove('active');
-        const linkHref = link.getAttribute('href');
-        if (linkHref === currentPage) {
+        const linkHref = normalizeHref(link.getAttribute('href'));
+        if (linkHref === normalizedCurrentPage) {
             link.classList.add('active');
         }
     });
