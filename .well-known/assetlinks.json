@@ -1,1 +1,8 @@
-[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"app.netlify.mnrfoodbill.twa","sha256_cert_fingerprints":["4F:D9:49:1C:DE:D7:89:71:B7:05:C6:12:8A:05:BA:1F:34:19:B7:84:62:FB:14:93:C5:93:08:94:AC:EB:E0:E7"]}}]
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.netlify.mnrfoodbill.twa",
+        "sha256_cert_fingerprints": ["FC:71:FF:F9:DA:19:6F:3F:28:DA:74:B5:FC:74:1E:35:44:EC:2C:1F:83:2F:58:98:86:F1:1D:BE:B1:A4:90:88"]
+      }
+    }]
